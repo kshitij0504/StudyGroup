@@ -1,8 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const cookieParser = require('cookie-parser')
-const router = require("./router/index")
+const cookieParser = require("cookie-parser");
+const router = require("./router/index");
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -13,9 +13,18 @@ app.use(express.json());
 app.use(cookieParser());
 
 const PORT = process.env.PORT || 8000;
-app.use("/api",router)
-
+app.use("/api", router);
 
 app.listen(PORT, () => {
   console.log(`Server is running on ${PORT}`);
+});
+
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+  const messgae = err.messgae || "Internal Server Error";
+  res.status(statusCode).json({
+    success: false,
+    statusCode,
+    messgae,
+  })
 });

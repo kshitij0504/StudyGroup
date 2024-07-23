@@ -1,12 +1,23 @@
-const prisma = require('../config/connectDB')
-const bcryptjs = require('bcryptjs');
-const nodemailer = require('nodemailer');
-const otpGenerator = require('otp-generator');
-
+const prisma = require("../config/connectDB");
+const bcryptjs = require("bcryptjs");
+const nodemailer = require("nodemailer");
+const otpGenerator = require("otp-generator");
 
 async function signup(req, res) {
   try {
     const { username, email, password } = req.body;
+
+    if (
+      !username ||
+      !email ||
+      !password ||
+      username === "" ||
+      email === "" ||
+      password === ""
+    ) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
     const checkEmail = await prisma.user.findUnique({
       where: { email },
     });

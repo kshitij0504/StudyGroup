@@ -14,13 +14,14 @@ datasource db {
 }
 
 model User {
-  id          Int               @id @default(autoincrement())
-  name        String?
-  email       String            @unique
-  password    String?
-  profile_pic String?           
-  otp         UserVerification?
-  created_at  DateTime          @default(now())
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  avatar    String   @default("https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  verifications UserVerification[]
 }
 
 model UserVerification {

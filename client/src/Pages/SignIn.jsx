@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import logo from "../assets/final.png";
-import download from "../assets/download.png"
+import download from "../assets/download.png";
 import { Button, Label, TextInput, Spinner } from "flowbite-react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import "react-toastify/dist/ReactToastify.css";
+import { useDispatch, useSelector } from "react-redux";
+import { signinStart, signinSuccess, signinFailure } from "../redux/user/userSlice";
 
 const SignIn = () => {
   const [formdata, setformdata] = useState({
@@ -13,7 +15,8 @@ const SignIn = () => {
     password: "",
   });
 
-  const [loading, setLoading] = useState(false);
+  const loading = useSelector((state) => state.user.loading);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handlechange = (e) => {
@@ -29,26 +32,28 @@ const SignIn = () => {
     if (!formdata.email || !formdata.password) {
       return toast.error("Please fill out all fields.");
     }
-    setLoading(true);
+    dispatch(signinStart());
     try {
-      const URL = `http://localhost:8000/api/signup`;
+      const URL = `http://localhost:8000/api/signin`;
       const response = await axios.post(URL, formdata);
       toast.success(response.data.message);
 
       if (response.data.success) {
+        dispatch(signinSuccess(response.data.user));
         setformdata({
-          username: "",
           email: "",
           password: "",
         });
-        navigate("/signin");
+        navigate("/home");
+      } else {
+        dispatch(signinFailure("Sign in failed"));
       }
     } catch (error) {
+      dispatch(signinFailure(error.response.data.message));
       toast.error(error.response.data.message);
-    } finally {
-      setLoading(false);
     }
   };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
       <div className="flex flex-col md:flex-row items-center md:items-start p-8 max-w-4xl w-full bg-gray-800 rounded-lg shadow-lg gap-8">
@@ -100,7 +105,7 @@ const SignIn = () => {
               />
             </div>
             <Button pill type="submit" disabled={loading}>
-              {loading ? <Spinner size="lg" /> : "Sign Up"}
+              {loading ? <Spinner size="lg" /> : "Sign In"}
             </Button>
           </form>
           <div className="relative mt-6">
@@ -111,13 +116,18 @@ const SignIn = () => {
               <span className="bg-gray-800 px-2 text-white">OR</span>
             </div>
           </div>
-          <Button color="failure" pill className="mt-6 w-full flex items-center justify-center gap-2">
-            <img src={download} className="h-6 w-6 rounded-full mr-2"/>Sign Up with Google
+          <Button
+            color="failure"
+            pill
+            className="mt-6 w-full flex items-center justify-center gap-2"
+          >
+            <img src={download} className="h-6 w-6 rounded-full mr-2" />
+            Sign Up with Google
           </Button>
 
           <div className="flex gap-2 text-sm mt-5 justify-center md:justify-center">
             <span className="text-lg">Don't have an account?</span>
-            <Link to="/" className="text-blue-500 text-lg">
+            <Link to="/signup" className="text-blue-500 text-lg">
               Sign Up
             </Link>
           </div>

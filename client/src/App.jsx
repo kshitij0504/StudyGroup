@@ -5,6 +5,7 @@ import SignUp from "./Pages/SignUp";
 // import Header from "./Components/Header";
 import toast, { Toaster } from "react-hot-toast";
 import Otp from "./Pages/Otp";
+import Home from "./Pages/Home";
 const App = () => {
   return (
     <BrowserRouter>
@@ -12,7 +13,8 @@ const App = () => {
       <Routes>
         <Route path="/" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
-        <Route path="/otp" element={<Otp />}/>
+        <Route path="/otp" element={<Otp />} />
+        <Route path="/home" element={<Home />} />
       </Routes>
     </BrowserRouter>
   );

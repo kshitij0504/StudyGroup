@@ -45,7 +45,7 @@ const SignUp = () => {
           email: "",
           password: "",
         });
-        navigate("/signin");
+        navigate("/otp", {state: {email: formdata.email}});
       }
     } catch (error) {
       toast.error(error.response.data.message);

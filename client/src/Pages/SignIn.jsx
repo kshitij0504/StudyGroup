@@ -39,7 +39,7 @@ const SignIn = () => {
       toast.success(response.data.message);
 
       if (response.data.success) {
-        dispatch(signinSuccess(response.data.user));
+        dispatch(signinSuccess(response.data));
         setformdata({
           email: "",
           password: "",

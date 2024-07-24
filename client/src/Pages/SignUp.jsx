@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import logo from "../assets/final.png";
-import { Button, Label, TextInput } from "flowbite-react";
+import { Button, Label, TextInput, Spinner } from "flowbite-react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import "react-toastify/dist/ReactToastify.css";
+import download from "../assets/download.png"
 
 const SignUp = () => {
   const [formdata, setformdata] = useState({
@@ -13,6 +14,7 @@ const SignUp = () => {
     password: "",
   });
 
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handlechange = (e) => {
@@ -30,6 +32,7 @@ const SignUp = () => {
     }
 
     console.log("Submitting form data:", formdata);
+    setLoading(true);
 
     try {
       const URL = `http://localhost:8000/api/signup`;
@@ -46,6 +49,8 @@ const SignUp = () => {
       }
     } catch (error) {
       toast.error(error.response.data.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -115,10 +120,21 @@ const SignUp = () => {
                 autoComplete="password"
               />
             </div>
-            <Button pill type="submit">
-              Sign Up
+            <Button pill type="submit" disabled={loading}>
+              {loading ? <Spinner size="lg" /> : "Sign Up"}
             </Button>
           </form>
+          <div className="relative mt-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-gray-800 px-2 text-white">OR</span>
+            </div>
+          </div>
+          <Button color="failure" pill className="mt-6 w-full">
+            <img src={download} className="h-6 w-6 rounded-full mr-2"/>Sign Up with Google
+          </Button>
           <div className="flex gap-2 text-sm mt-5 justify-center md:justify-center">
             <span className="text-lg">Have an account?</span>
             <Link to="/SignIn" className="text-blue-500 text-lg">

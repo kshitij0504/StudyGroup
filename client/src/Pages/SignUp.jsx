@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import "react-toastify/dist/ReactToastify.css";
-import download from "../assets/download.png"
+import OAuth from "./OAuth";
 
 const SignUp = () => {
   const [formdata, setformdata] = useState({
@@ -132,9 +132,7 @@ const SignUp = () => {
               <span className="bg-gray-800 px-2 text-white">OR</span>
             </div>
           </div>
-          <Button color="failure" pill className="mt-6 w-full">
-            <img src={download} className="h-6 w-6 rounded-full mr-2"/>Sign Up with Google
-          </Button>
+          <OAuth />
           <div className="flex gap-2 text-sm mt-5 justify-center md:justify-center">
             <span className="text-lg">Have an account?</span>
             <Link to="/SignIn" className="text-blue-500 text-lg">

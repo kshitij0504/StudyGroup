@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import logo from "../assets/final.png";
-import download from "../assets/download.png";
 import { Button, Label, TextInput, Spinner } from "flowbite-react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -8,6 +7,7 @@ import toast from "react-hot-toast";
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch, useSelector } from "react-redux";
 import { signinStart, signinSuccess, signinFailure } from "../redux/user/userSlice";
+import OAuth from "./OAuth";
 
 const SignIn = () => {
   const [formdata, setformdata] = useState({
@@ -116,18 +116,11 @@ const SignIn = () => {
               <span className="bg-gray-800 px-2 text-white">OR</span>
             </div>
           </div>
-          <Button
-            color="failure"
-            pill
-            className="mt-6 w-full flex items-center justify-center gap-2"
-          >
-            <img src={download} className="h-6 w-6 rounded-full mr-2" />
-            Sign Up with Google
-          </Button>
+          <OAuth />
 
           <div className="flex gap-2 text-sm mt-5 justify-center md:justify-center">
             <span className="text-lg">Don't have an account?</span>
-            <Link to="/signup" className="text-blue-500 text-lg">
+            <Link to="/" className="text-blue-500 text-lg">
               Sign Up
             </Link>
           </div>

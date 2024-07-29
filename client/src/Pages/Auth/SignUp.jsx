@@ -1,22 +1,20 @@
 import React, { useState } from "react";
-import logo from "../assets/final.png";
+import logo from 'E:/PERN_STACK/client/src/assets/final.png'
 import { Button, Label, TextInput, Spinner } from "flowbite-react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import "react-toastify/dist/ReactToastify.css";
-import { useDispatch, useSelector } from "react-redux";
-import { signinStart, signinSuccess, signinFailure } from "../redux/user/userSlice";
 import OAuth from "./OAuth";
 
-const SignIn = () => {
+const SignUp = () => {
   const [formdata, setformdata] = useState({
+    username: "",
     email: "",
     password: "",
   });
 
-  const loading = useSelector((state) => state.user.loading);
-  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handlechange = (e) => {
@@ -29,28 +27,30 @@ const SignIn = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formdata.email || !formdata.password) {
+    if (!formdata.username || !formdata.email || !formdata.password) {
       return toast.error("Please fill out all fields.");
     }
-    dispatch(signinStart());
+
+    console.log("Submitting form data:", formdata);
+    setLoading(true);
+
     try {
-      const URL = `http://localhost:8000/api/signin`;
+      const URL = `http://localhost:8000/api/signup`;
       const response = await axios.post(URL, formdata);
       toast.success(response.data.message);
 
       if (response.data.success) {
-        dispatch(signinSuccess(response.data));
         setformdata({
+          username: "",
           email: "",
           password: "",
         });
-        navigate("/home");
-      } else {
-        dispatch(signinFailure("Sign in failed"));
+        navigate("/otp", {state: {email: formdata.email}});
       }
     } catch (error) {
-      dispatch(signinFailure(error.response.data.message));
       toast.error(error.response.data.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,15 +63,31 @@ const SignIn = () => {
             alt="mylogo"
             className="h-30 w-30 md:h-42 md:w-42 object-contain"
           />
-          <p className="text-xl md:text-2xl lg:text-4xl font-bold text-white mt-2 md:mt-4 lg:mt-6 text-center md:text-center">
+          <p className="text-xl md:text-2xl lg:text-4xl font-extrabold text-white mt-2 md:mt-4 lg:mt-6 text-center md:text-center">
             Welcome to Class Plus
           </p>
           <p className="text-xs md:text-sm lg:text-base font-medium mt-2 text-white text-center md:text-center">
-            Join Using Your Credentials...
+            Join us in a journey of knowledge and growth.
           </p>
         </div>
         <div className="flex-1 w-full mt-20">
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            <div>
+              <Label
+                htmlFor="username"
+                className="text-white"
+                value="Enter Your Username"
+              />
+              <TextInput
+                type="text"
+                placeholder="Username"
+                id="username"
+                name="username"
+                onChange={handlechange}
+                value={formdata.username}
+                autoComplete="username"
+              />
+            </div>
             <div>
               <Label
                 htmlFor="email"
@@ -105,7 +121,7 @@ const SignIn = () => {
               />
             </div>
             <Button pill type="submit" disabled={loading}>
-              {loading ? <Spinner size="lg" /> : "Sign In"}
+              {loading ? <Spinner size="lg" /> : "Sign Up"}
             </Button>
           </form>
           <div className="relative mt-6">
@@ -117,11 +133,10 @@ const SignIn = () => {
             </div>
           </div>
           <OAuth />
-
           <div className="flex gap-2 text-sm mt-5 justify-center md:justify-center">
-            <span className="text-lg">Don't have an account?</span>
-            <Link to="/" className="text-blue-500 text-lg">
-              Sign Up
+            <span className="text-lg">Have an account?</span>
+            <Link to="/SignIn" className="text-blue-500 text-lg">
+              Sign In
             </Link>
           </div>
         </div>
@@ -130,4 +145,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default SignUp;

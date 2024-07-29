@@ -1,10 +1,10 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import SignIn from "./Pages/SignIn";
-import SignUp from "./Pages/SignUp";
+import SignIn from "./Pages/Auth/SignIn";
+import SignUp from "./Pages/Auth/SignUp";
 // import Header from "./Components/Header";
 import toast, { Toaster } from "react-hot-toast";
-import Otp from "./Pages/Otp";
+import Otp from "./Pages/Auth/Otp";
 import Home from "./Pages/Home";
 const App = () => {
   return (

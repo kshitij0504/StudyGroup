@@ -1,9 +1,9 @@
 import React from "react";
 import { Button } from "flowbite-react";
-import download from "../assets/download.png";
-import { app } from "../firebase";
+import download from "../../assets/download.png"
+import { app } from "../../firebase";
 import { GoogleAuthProvider, signInWithPopup, getAuth } from "firebase/auth";
-import { signinFailure, signinSuccess } from "../redux/user/userSlice";
+import { signinFailure, signinSuccess } from "../../redux/user/userSlice";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 

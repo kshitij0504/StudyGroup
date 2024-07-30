@@ -6,6 +6,7 @@ import toast, { Toaster } from "react-hot-toast";
 import Otp from "./Pages/Auth/Otp";
 import Home from "./Pages/Home";
 import PrivatePage from "./Components/PrivatePage";
+import UpdateProfile from "./Pages/UpdateProfile";
 const App = () => {
   return (
     <BrowserRouter>
@@ -16,6 +17,7 @@ const App = () => {
         <Route path="/otp" element={<Otp />} />
         <Route element={<PrivatePage />}>
           <Route path="/home" element={<Home />} />
+          <Route path="/updateprofile" element={<UpdateProfile />} />
         </Route>
       </Routes>
     </BrowserRouter>

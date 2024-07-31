@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import logo from 'E:/PERN_STACK/client/src/assets/final.png'
+import logo from '../../assets/final.png'
 import { Button, Label, TextInput, Spinner } from "flowbite-react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";

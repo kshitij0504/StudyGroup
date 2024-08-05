@@ -7,6 +7,7 @@ import Otp from "./Pages/Auth/Otp";
 import Home from "./Pages/Home";
 import PrivatePage from "./Components/PrivatePage";
 import UpdateProfile from "./Pages/UpdateProfile";
+import LayoutwithSidebar from "./Components/LayoutwithSidebar";
 const App = () => {
   return (
     <BrowserRouter>
@@ -16,8 +17,10 @@ const App = () => {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/otp" element={<Otp />} />
         <Route element={<PrivatePage />}>
-          <Route path="/home" element={<Home />} />
-          <Route path="/updateprofile" element={<UpdateProfile />} />
+        <Route element={<LayoutwithSidebar />}>
+            <Route path="/home" element={<Home />} />
+            <Route path="/updateprofile" element={<UpdateProfile />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

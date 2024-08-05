@@ -8,7 +8,11 @@ module.exports = {
     flowbite.content(),
   ],
   theme: {
-    extend: {},
+    extend: {
+      backgroundImage: {
+        'hero': "url('/src/assets/hero-background.png')",
+      },
+    },
   },
   plugins: [
     // ...

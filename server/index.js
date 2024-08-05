@@ -3,6 +3,8 @@ const cors = require("cors");
 const app = express();
 const cookieParser = require("cookie-parser");
 const router = require("./router/index");
+app.use(cookieParser());
+
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -10,7 +12,6 @@ app.use(
   })
 );
 app.use(express.json());
-app.use(cookieParser());
 
 const PORT = process.env.PORT || 8000;
 app.use("/api", router);

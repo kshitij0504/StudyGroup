@@ -1,42 +1,35 @@
 const jwt = require("jsonwebtoken");
-const prisma = require("../config/connectDB")
 
-const getUserDetailstoken = async (token) => {
+/**
+ * 
+ * @param {import('express').Request} req 
+ * @param {import('express').Response} res 
+ * @param {*} next 
+ * @returns 
+ */
+
+const getUserDetailstoken = (req, res, next) => {
+  const token = req.cookies.token;
+  console.log(req.cookies)
+  console.log(req.headers)
+  console.log("Token received:", token); // Debug log
+
   if (!token) {
-    return {
-      message: "session out",
-      logout: true,
-    };
+    console.log("No token found"); // Debug log
+    return res.status(401).json({ message: "Unauthorized" });
   }
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        profile_pic: true,
-        created_at: true,
-      },
-    });
-
-    if (!user) {
-      return {
-        message: "User not found",
-        logout: true,
-      };
+  jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => {
+    if (err) {
+      console.log("Token verification failed"); // Debug log
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
-    return user;
-  } catch (error) {
-    return {
-      message: error.message || "Invalid token",
-      logout: true,
-    };
-  }
+    req.user = user;
+    console.log("User authenticated:", user); // Debug log
+    next();
+  });
 };
+
 
 module.exports = getUserDetailstoken;

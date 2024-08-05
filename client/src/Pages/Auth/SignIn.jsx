@@ -35,8 +35,10 @@ const SignIn = () => {
     dispatch(signinStart());
     try {
       const URL = `http://localhost:8000/api/signin`;
-      const response = await axios.post(URL, formdata);
+      const response = await axios.post(URL, formdata, {withCredentials: true});
       toast.success(response.data.message);
+      console.log(response);
+      
 
       if (response.data.success) {
         dispatch(signinSuccess(response.data.data.user));
@@ -47,6 +49,7 @@ const SignIn = () => {
         navigate("/home");
       } else {
         dispatch(signinFailure("Sign in failed"));
+        
       }
     } catch (error) {
       dispatch(signinFailure(error.response.data.message));

@@ -38,7 +38,6 @@ async function checkEmail(req, res) {
 
     const payload = {
       id: user.id,
-      email: user.email,
     };
 
     const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
@@ -47,12 +46,14 @@ async function checkEmail(req, res) {
 
     const cookieOptions = {
       httpOnly: true, 
-      secure: true,   
+      // secure: true,   
+      sameSite: 'strict',
+      // path: '/'
     };
 
-    res.cookie("token", token, cookieOptions);
+    console.log(token)
 
-    return res.status(200).json({
+    res.cookie("token", token, cookieOptions).json({
       message: "Login successful",
       success: true,
       data: {
@@ -66,7 +67,10 @@ async function checkEmail(req, res) {
           avatar: user.avatar
         },
       },
-    });
+    })
+
+    // return res.status(200).json({
+    // });
   } catch (error) {
     console.error("Error in checkEmail:", error);
     return res.status(500).json({

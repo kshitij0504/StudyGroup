@@ -1,8 +1,10 @@
-import React, { createContext, useContext, useState } from "react";
-import image from "../assets/logo1.png";
+import React, {  createContext,useContext,useState } from "react";
+import { Link } from "react-router-dom"; // Import Link from react-router-dom
 import { ChevronFirst, ChevronLast, MoreVertical } from "lucide-react";
+import image from "../assets/logo1.png"
 
 const SidebarContext = createContext();
+
 const Sidebar = ({ children }) => {
   const [expanded, setExpanded] = useState(true);
 
@@ -46,19 +48,22 @@ const Sidebar = ({ children }) => {
   );
 };
 
-export function SidebarItem({ icon, text, active }) {
-    const expanded = useContext(SidebarContext)
+export function SidebarItem({ icon, text, active, to }) {
+  const expanded = useContext(SidebarContext);
+
   return (
     <li
       className={`relative flex items-center py-2 px-3 my-1 font-medium rounded-md cursor-pointer transition-colors group ${
         active ? "bg-yellow-500 text-gray-900" : "hover:bg-[#5271ff] text-white"
       }`}
     >
-      {icon}
-      <span className={`overflow-hidden transition-all ${expanded ? "ml-2" : "w-0"}`}>{text}</span>
-      {!expanded && (
-        <div className={`absolute left-full rounded-md px-2 py-1 ml-6 bg-[#5271ff] text-white text-sm invisible opacity-20 -translate-x-3 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-x-0`}>{text}</div>
-      )}
+      <Link to={to} className="flex items-center w-full">
+        {icon}
+        <span className={`overflow-hidden transition-all ${expanded ? "ml-2" : "w-0"}`}>{text}</span>
+        {!expanded && (
+          <div className={`absolute left-full rounded-md px-2 py-1 ml-6 bg-[#5271ff] text-white text-sm invisible opacity-20 -translate-x-3 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-x-0`}>{text}</div>
+        )}
+      </Link>
     </li>
   );
 }

@@ -25,21 +25,21 @@ const LayoutwithSidebar = () => {
         <SidebarItem
           icon={<Presentation size={20} />}
           text="Meeting"
-          to="/meeting" // Path to navigate to Meeting
+          to="/meeting" 
         />
         <SidebarItem
           icon={<RxUpdate size={20} />}
           text="Update Profile"
-          to="/updateprofile" // Path to navigate to Update Profile
+          to="/updateprofile"
         />
         <SidebarItem
           icon={<Calendar size={20} />}
           text="Schedule"
-          to="/schedule" // Path to navigate to Schedule
+          to="/schedule"
         />
       </Sidebar>
       <div className="flex-1 p-4">
-        <Outlet /> {/* This will render the routed components like Home */}
+        <Outlet /> 
       </div>
     </div>
   );

@@ -1,12 +1,5 @@
 const jwt = require("jsonwebtoken");
 
-/**
- * 
- * @param {import('express').Request} req 
- * @param {import('express').Response} res 
- * @param {*} next 
- * @returns 
- */
 
 const getUserDetailstoken = (req, res, next) => {
   const token = req.cookies.token;

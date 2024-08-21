@@ -8,7 +8,14 @@ async function signup(req, res) {
   try {
     const { username, email, password } = req.body;
 
-    if (!username || !email || !password || username === "" || email === "" || password === "") {
+    if (
+      !username ||
+      !email ||
+      !password ||
+      username === "" ||
+      email === "" ||
+      password === ""
+    ) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -52,8 +59,8 @@ async function signup(req, res) {
 async function sendOTPverification(email) {
   const otp = otpGenerator.generate(4, {
     digits: true,
-    alphabets: false,
-    upperCase: false,
+    alphabets: false, // Ensure alphabets are not included
+    upperCase: false, // Ensure no uppercase letters are included
     specialChars: false,
   });
 
@@ -191,7 +198,6 @@ async function sendGeneratedPassword(email, password) {
     html: emailTemplate,
   });
 }
-
 
 async function VerifyOTP(req, res) {
   const { email, otp } = req.body;

@@ -23,7 +23,6 @@ const App = () => {
           <Route element={<LayoutwithSidebar />}>
             <Route path="/home" element={<Home />} />
             <Route path="/updateprofile" element={<UpdateProfile />} />
-            <Route path="/creategroup" element={<Group />} />
             <Route path="/displaygroups" element={<DisplayGroup />} />
             <Route path="/groups/:id" element={<ParticularGroup />} />
           </Route>

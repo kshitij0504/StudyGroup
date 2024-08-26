@@ -20,7 +20,7 @@ const LayoutwithSidebar = () => {
         <SidebarItem
           icon={<MessageCircle size={20} />}
           text="Group"
-          to="/group" // Path to navigate to Group
+          to="/displaygroups" // Path to navigate to Group
         />
         <SidebarItem
           icon={<Presentation size={20} />}
@@ -38,7 +38,7 @@ const LayoutwithSidebar = () => {
           to="/schedule"
         />
       </Sidebar>
-      <div className="flex-1 p-4">
+      <div className="flex-1">
         <Outlet /> 
       </div>
     </div>

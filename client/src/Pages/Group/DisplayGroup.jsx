@@ -1,35 +1,40 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Card,
+  Navbar,
   Button,
   Modal,
+  Dropdown,
   TextInput,
   Textarea,
   Label,
   Alert,
-} from "flowbite-react"; // Import Button from Flowbite
-import { HiPlus } from "react-icons/hi"; // Import an icon from react-icons
+  Card,
+} from "flowbite-react";
+import { HiPlus, HiTrash } from "react-icons/hi";
 import axios from "axios";
-import { useDispatch, useSelector } from "react-redux";
-import { toast } from "react-hot-toast"; // Import toast for notifications
+import { useSelector } from "react-redux";
+import { toast } from "react-hot-toast";
 
 const DisplayGroup = () => {
   const { currentUser } = useSelector((state) => state.user || {});
   const [groups, setGroups] = useState([]);
-  const [openModal, setOpenModal] = useState(false);
+  const [openCreateModal, setOpenCreateModal] = useState(false);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [groupGradients, setGroupGradients] = useState({});
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  const [groupToDelete, setGroupToDelete] = useState(null);
 
   useEffect(() => {
     const memberId = currentUser.id;
     if (memberId) {
       fetchGroups(memberId);
     }
-  }, []);
+  }, [currentUser]);
 
   const fetchGroups = async (memberId) => {
     try {
@@ -39,7 +44,6 @@ const DisplayGroup = () => {
       const data = response.data.data || [];
       setGroups(Array.isArray(data) ? data : []);
 
-      // Assign a random gradient to each group and store it in state
       const gradients = {};
       data.forEach((group) => {
         gradients[group.id] = getRandomGradient();
@@ -58,16 +62,13 @@ const DisplayGroup = () => {
     try {
       const response = await axios.post(
         "http://localhost:8000/api/creategroup",
-        {
-          name,
-          description,
-        },
+        { name, description },
         { withCredentials: true }
       );
 
       toast.success("Group created successfully!");
 
-      const newGroup = response.data.data; 
+      const newGroup = response.data.data;
       setGroups((prevGroups) => [...prevGroups, newGroup]);
 
       setGroupGradients((prevGradients) => ({
@@ -77,13 +78,47 @@ const DisplayGroup = () => {
 
       setName("");
       setDescription("");
-      setOpenModal(false); 
+      setOpenCreateModal(false);
     } catch (err) {
       toast.error("Failed to create group. Please try again.");
       setError(err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDelete = async () => {
+    if (deleteConfirmation !== "delete") {
+      toast.error("Please type 'delete' to confirm.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await axios.delete(`http://localhost:8000/api/group/${groupToDelete}`, {
+        withCredentials: true,
+      });
+
+      toast.success("Group deleted successfully!");
+
+      setGroups((prevGroups) =>
+        prevGroups.filter((group) => group.id !== groupToDelete)
+      );
+      setOpenDeleteModal(false);
+      setDeleteConfirmation("");
+    } catch (err) {
+      toast.error("Failed to delete group. Please try again.");
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openDeleteConfirmationModal = (groupId) => {
+    setGroupToDelete(groupId);
+    setOpenDeleteModal(true);
   };
 
   const getRandomGradient = () => {
@@ -99,19 +134,94 @@ const DisplayGroup = () => {
     return gradients[Math.floor(Math.random() * gradients.length)];
   };
 
+  const leaderGroups = groups.filter(
+    (group) => group.leaderId === currentUser.id
+  );
+  const memberGroups = groups.filter(
+    (group) => group.leaderId !== currentUser.id
+  );
+
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">Study Groups</h1>
-        <Button
-          gradientDuoTone="greenToBlue"
-          className="flex items-center gap-2"
-          onClick={() => setOpenModal(true)} 
-        >
-          <HiPlus className="h-5 w-5" />
-          <span>Join Group / Create Group</span>
-        </Button>
-        <Modal show={openModal} onClose={() => setOpenModal(false)}>
+    <>
+      <Navbar className="bg-gray-800 p-4">
+        <div className="container mx-auto flex justify-between items-center">
+          <h1 className="text-2xl font-semibold text-white">Study Groups</h1>
+          <Dropdown label="Join/Create Group" dismissOnClick={false}>
+            <Dropdown.Item onClick={() => setOpenCreateModal(true)}>
+              Create Group
+            </Dropdown.Item>
+            <Dropdown.Item>Settings</Dropdown.Item>
+          </Dropdown>
+        </div>
+      </Navbar>
+      <div className="bg-gray-900 text-white p-4">
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Groups You Lead</h2>
+          <hr className="border-gray-700 mb-4" />
+          {leaderGroups.length === 0 ? (
+            <div className="text-center text-white font-semibold text-lg">
+              You are not leading any groups.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {leaderGroups.map((group) => (
+                <div key={group.id} className="relative">
+                  <Link to={`/groups/${group.id}`}>
+                    <Card
+                      className={`p-4 ${
+                        groupGradients[group.id]
+                      } rounded-lg shadow-md`}
+                    >
+                      <div className="text-center text-white font-semibold text-lg">
+                        {group.name}
+                      </div>
+                    </Card>
+                  </Link>
+                  <button
+                    onClick={() => openDeleteConfirmationModal(group.id)}
+                    className="absolute top-2 right-2 text-black hover:text-red-700"
+                  >
+                    <HiTrash className="h-5 w-5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <h2 className="text-xl font-semibold mb-4">
+            Groups You Are a Member Of
+          </h2>
+          <hr className="border-gray-700 mb-4" />
+          {memberGroups.length === 0 ? (
+            <div className="text-center text-white font-semibold text-lg">
+              You are not part of any groups. Please ask the leader to add you
+              to a group.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {memberGroups.map((group) => (
+                <div key={group.id} className="relative">
+                  <Link to={`/groups/${group.id}`}>
+                    <Card
+                      className={`p-4 ${
+                        groupGradients[group.id]
+                      } rounded-lg shadow-md`}
+                    >
+                      <div className="text-center text-white font-semibold text-lg">
+                        {group.name}
+                      </div>
+                    </Card>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Create Group Modal */}
+        <Modal show={openCreateModal} onClose={() => setOpenCreateModal(false)}>
           <Modal.Header>Create A Group</Modal.Header>
           <Modal.Body>
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -125,6 +235,7 @@ const DisplayGroup = () => {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter group name"
                   required
+                  className="text-black"
                 />
               </div>
               <div>
@@ -135,6 +246,7 @@ const DisplayGroup = () => {
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Enter group description"
                   rows={4}
+                  className="text-black"
                 />
               </div>
             </form>
@@ -145,35 +257,56 @@ const DisplayGroup = () => {
               type="submit"
               pill
               disabled={loading}
+              className="bg-blue-500 hover:bg-blue-700 text-white"
             >
-              {loading ? "Creating..." : "Create Group"}
+              {loading ? "Creating..." : "Create"}
+            </Button>
+            <Button onClick={() => setOpenCreateModal(false)} pill color="gray">
+              Cancel
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        {/* Delete Group Confirmation Modal */}
+        <Modal
+          show={openDeleteModal}
+          onClose={() => setOpenDeleteModal(false)}
+        >
+          <Modal.Header>Confirm Group Deletion</Modal.Header>
+          <Modal.Body>
+            <p className="text-black">
+              Are you sure you want to delete this group? This action cannot be
+              undone.
+            </p>
+            <p className="text-black mt-4">
+              Please type <strong>delete</strong> to confirm.
+            </p>
+            <TextInput
+              id="deleteConfirmation"
+              type="text"
+              value={deleteConfirmation}
+              onChange={(e) => setDeleteConfirmation(e.target.value)}
+              placeholder="Type 'delete' to confirm"
+              required
+              className="text-black mt-2"
+            />
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              onClick={handleDelete}
+              pill
+              disabled={loading}
+              className="bg-red-500 hover:bg-red-700 text-white"
+            >
+              {loading ? "Deleting..." : "Delete"}
+            </Button>
+            <Button onClick={() => setOpenDeleteModal(false)} pill color="gray">
+              Cancel
             </Button>
           </Modal.Footer>
         </Modal>
       </div>
-      {groups.length === 0 ? (
-        <div className="text-center text-white font-semibold text-lg">
-          You are not part of any groups. Please ask the leader to add you to a
-          group.
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {groups.map((group) => (
-            <Link to={`/groups/${group.id}`} key={group.id}>
-              <Card
-                className={`p-4 ${
-                  groupGradients[group.id]
-                } rounded-lg shadow-md`}
-              >
-                <div className="text-center text-white font-semibold text-lg">
-                  {group.name}
-                </div>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      )}
-    </div>
+    </>
   );
 };
 

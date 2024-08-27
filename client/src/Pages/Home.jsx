@@ -1,9 +1,36 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import io from 'socket.io-client'; // Ensure to import socket.io-client
 
 const Home = () => {
+  const { currentUser } = useSelector((state) => state.user || {});
   const now = new Date();
   const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   const date = new Intl.DateTimeFormat('en-US', { dateStyle: 'full' }).format(now);
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    if (!currentUser || !currentUser.id) return; // Check if currentUser and currentUser.id exist
+  
+    const socket = io('http://localhost:8000', {
+      withCredentials: true,
+    });
+  
+    socket.on('connect', () => {
+      console.log('Connected to server');
+    });
+  
+    socket.on(`notification_${currentUser.id}`, (notification) => {
+      setNotifications((prevNotifications) => [
+        ...prevNotifications,
+        notification,
+      ]);
+    });
+  
+    return () => {
+      socket.disconnect();
+    };
+  }, [currentUser.id]);
 
   return (
     <section className="flex flex-col gap-5 p-4 text-white">
@@ -44,9 +71,15 @@ const Home = () => {
         <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 rounded-[20px] shadow-lg">
           <h3 className="text-xl font-semibold mb-4">Recent Activity</h3>
           <ul className="space-y-2">
-            <li className="bg-white/20 p-3 rounded-md">Activity 1</li>
-            <li className="bg-white/20 p-3 rounded-md">Activity 2</li>
-            <li className="bg-white/20 p-3 rounded-md">Activity 3</li>
+            {notifications.length > 0 ? (
+              notifications.map((notification, index) => (
+                <li key={index} className="bg-white/20 p-3 rounded-md">
+                  {notification.message} {/* Adjust if your notification has a different structure */}
+                </li>
+              ))
+            ) : (
+              <li className="bg-white/20 p-3 rounded-md">No recent activity</li>
+            )}
           </ul>
         </div>
       </div>

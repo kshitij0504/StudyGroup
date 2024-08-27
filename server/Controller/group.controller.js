@@ -150,6 +150,17 @@ async function addMemberToGroup(req, res) {
       },
     });
 
+    await prisma.notification.create({
+      data: {
+        userId: user.id,
+        message: `You have been added to group ${group.name}.`,
+      },
+    });
+
+    req.io.emit(`notification_${user.id}`, {
+      message: `You have been added to group ${group.name}.`,
+    });
+    
     res.status(200).json({
       message: "Member added to group successfully",
       data: group,
@@ -157,6 +168,22 @@ async function addMemberToGroup(req, res) {
   } catch (error) {
     console.error("Error adding member to group:", error);
     res.status(500).json({ error: "Failed to add member to group" });
+  }
+}
+
+async function notification(req,res){
+  const userId = req.user.id; 
+
+  try {
+    const notifications = await prisma.notification.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' }
+    });
+    io.emit(`notification_${userId}`, { message: `You have been added to group ${group.name}.` });
+    res.json({ notifications });
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+    res.status(500).json({ error: 'Error fetching notifications' });
   }
 }
 
@@ -207,5 +234,6 @@ module.exports = {
   getGroups,
   getparticularGroup,
   addMemberToGroup,
+  notification,
   deleteGroup
 };

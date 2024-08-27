@@ -14,6 +14,7 @@ const {
   getparticularGroup,
   addMemberToGroup,
   deleteGroup,
+  notification,
 } = require("../Controller/group.controller");
 router.post("/signup", signup);
 
@@ -34,4 +35,6 @@ router.post("/groups/:groupId/add-member", addMemberToGroup);
 router.get("/groups/:id", getparticularGroup);
 
 router.delete("/group/:id", getUserDetailstoken, deleteGroup);
+
+router.get("/notifications/:userId", notification)
 module.exports = router;

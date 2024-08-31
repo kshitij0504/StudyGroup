@@ -11,6 +11,8 @@ import Group from "./Pages/Group/Group";
 import DisplayGroup from "./Pages/Group/DisplayGroup";
 import LayoutwithSidebar from "./Components/LayoutwithSidebar";
 import ParticularGroup from "./Pages/Group/ParticualarGroup";
+import NotificationSection from "./Pages/UserPage/NotificationSection";
+import Settings from "./Pages/Group/settings";
 const App = () => {
   return (
     <BrowserRouter>
@@ -25,6 +27,8 @@ const App = () => {
             <Route path="/updateprofile" element={<UpdateProfile />} />
             <Route path="/displaygroups" element={<DisplayGroup />} />
             <Route path="/groups/:id" element={<ParticularGroup />} />
+            <Route path="/notification" element={<NotificationSection />} />
+            <Route path="/settings/:id" element={<Settings />} />
           </Route>
         </Route>
       </Routes>

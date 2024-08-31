@@ -26,6 +26,7 @@ const GroupDetail = () => {
   const { currentUser } = useSelector((state) => state.user || {});
   const { id } = useParams();
   const [group, setGroup] = useState(null);
+  const [joinCode, setJoinCode] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState([]);
@@ -41,6 +42,7 @@ const GroupDetail = () => {
         );
         console.log(response);
         setGroup(response.data.data);
+        setJoinCode(response.data.data.joinCode);
         setMembers(response.data.data?.members || []);
         setEvents(response.data.data?.events || []);
         console.log(response.data.data.leaderId);
@@ -90,16 +92,15 @@ const GroupDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex">
-      <SidebarComponent setShowModal={setShowModal} isLeader={isLeader} />
+      <SidebarComponent
+        setShowModal={setShowModal}
+        isLeader={isLeader}
+        joinCode={setJoinCode}
+        id={id}
+      />
       <div className="flex-1 p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-4xl font-bold">{group.name}</h1>
-          <div>
-            <Button color="success">Join Group</Button>
-            <Button color="danger" className="ml-2">
-              Leave Group
-            </Button>
-          </div>
         </div>
         <Card className="bg-gray-800 p-6 rounded-lg shadow-lg mb-6 border border-gray-700">
           <h2 className="text-2xl font-semibold mb-4">Group Details</h2>
@@ -136,10 +137,7 @@ const GroupDetail = () => {
             {members.length > 0 ? (
               members.map((member) => (
                 <div key={member?.id} className="flex items-center mt-2">
-                  <Avatar
-                    img={member?.avatar}
-                    rounded={true}
-                  />
+                  <Avatar img={member?.avatar} rounded={true} />
                   <div className="ml-4">
                     <p>{member?.username}</p>
                     <Badge color={member?.role === "leader" ? "info" : "gray"}>
@@ -187,7 +185,7 @@ const GroupDetail = () => {
   );
 };
 
-const SidebarComponent = ({ setShowModal, isLeader }) => (
+const SidebarComponent = ({ id, setShowModal, isLeader, joinCode }) => (
   <div className="w-64 bg-gray-800 p-4 flex flex-col min-h-screen border-r border-gray-700">
     <h2 className="text-2xl font-semibold text-white mb-6">Menu</h2>
     <ul className="flex-1">
@@ -211,15 +209,17 @@ const SidebarComponent = ({ setShowModal, isLeader }) => (
           </button>
         </li>
       )}
-      <li className="mb-4">
-        <Link
-          to="/settings"
-          className="text-white flex items-center hover:bg-[#5271ff] p-2 rounded transition-colors duration-300"
-        >
-          <FaCogs className="mr-2" />
-          Settings
-        </Link>
-      </li>
+      {isLeader && (
+        <li className="mb-4">
+          <Link
+            to={`/settings/${id}`}
+            className="text-white flex items-center hover:bg-[#5271ff] p-2 rounded transition-colors duration-300"
+          >
+            <FaCogs className="mr-2" />
+            Settings
+          </Link>
+        </li>
+      )}
       <li className="mb-4">
         <Link
           to="/chat"

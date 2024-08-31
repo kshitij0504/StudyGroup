@@ -1,8 +1,21 @@
 const prisma = require("../config/connectDB");
+const notification = require("../Controller/notification.controller");
+
+function generateJoinCode(length = 6) {
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let joinCode = "";
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    joinCode += characters[randomIndex];
+  }
+  return joinCode;
+}
 
 async function createGroup(req, res) {
   const { name, description } = req.body;
   const leaderId = req.user.id;
+
   if (!name || typeof name !== "string" || name.trim() === "") {
     return res
       .status(400)
@@ -29,11 +42,14 @@ async function createGroup(req, res) {
       return res.status(404).json({ error: "Leader not found" });
     }
 
+    const joinCode = generateJoinCode(6);
+
     const group = await prisma.group.create({
       data: {
         name: name.trim(),
         description: description?.trim() || null,
         leaderId,
+        joinCode,
         members: {
           connect: { id: leaderId },
         },
@@ -45,8 +61,52 @@ async function createGroup(req, res) {
       data: group,
     });
   } catch (error) {
-    console.error("Error creating group:", error); 
+    console.error("Error creating group:", error);
     res.status(500).json({ error: "Failed to create group" });
+  }
+}
+
+async function joinUsingCode(req, res) {
+  const { code } = req.body;
+  const userId = req.user.id;
+
+  if (!code || typeof code !== "string" || code.trim() === "") {
+    return res.status(400).json({ message: "Join Code is Required" });
+  }
+
+  try {
+    const group = await prisma.group.findUnique({
+      where: { joinCode: code.trim() },
+      include: { members: true },
+    });
+
+    if (!group) {
+      return res.status(404).json({ message: "Invalid Code" });
+    }
+
+    const isMember = group.members.some((member) => member.id === userId);
+    if (isMember) {
+      return res
+        .status(400)
+        .json({ error: "You are already a member of this group" });
+    }
+
+    await prisma.group.update({
+      where: { id: group.id },
+      data: {
+        members: {
+          connect: { id: userId },
+        },
+      },
+    });
+
+    res.status(200).json({
+      message: `Joined '${group.name}' successfully`,
+      data: group,
+    });
+  } catch (error) {
+    console.error("Error joining group:", error);
+    res.status(500).json({ error: "Failed to join group" });
   }
 }
 
@@ -118,18 +178,22 @@ async function getparticularGroup(req, res) {
 }
 
 async function addMemberToGroup(req, res) {
-  const { groupId } = req.params;  
+  const { groupId } = req.params;
   const groupIdInt = parseInt(groupId, 10);
   const { email, username } = req.body;
 
-  console.log(`Received groupId: ${groupId}, email: ${email}, name: ${username}`);
+  console.log(
+    `Received groupId: ${groupId}, email: ${email}, name: ${username}`
+  );
 
   if (!Number.isInteger(groupIdInt)) {
     return res.status(400).json({ error: "Invalid group ID" });
   }
 
   if (!email && !username) {
-    return res.status(400).json({ error: "Either email or name must be provided" });
+    return res
+      .status(400)
+      .json({ error: "Either email or name must be provided" });
   }
 
   try {
@@ -142,7 +206,7 @@ async function addMemberToGroup(req, res) {
     }
 
     const group = await prisma.group.update({
-      where: { id: groupIdInt }, 
+      where: { id: groupIdInt },
       data: {
         members: {
           connect: { id: user.id },
@@ -160,7 +224,7 @@ async function addMemberToGroup(req, res) {
     req.io.emit(`notification_${user.id}`, {
       message: `You have been added to group ${group.name}.`,
     });
-    
+
     res.status(200).json({
       message: "Member added to group successfully",
       data: group,
@@ -171,27 +235,10 @@ async function addMemberToGroup(req, res) {
   }
 }
 
-async function notification(req,res){
-  const userId = req.user.id; 
-
-  try {
-    const notifications = await prisma.notification.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' }
-    });
-    io.emit(`notification_${userId}`, { message: `You have been added to group ${group.name}.` });
-    res.json({ notifications });
-  } catch (error) {
-    console.error('Error fetching notifications:', error);
-    res.status(500).json({ error: 'Error fetching notifications' });
-  }
-}
-
-
 async function deleteGroup(req, res) {
   const { id } = req.params;
-  const userId = req.user.id; 
-  console.log(userId)
+  const userId = req.user.id;
+  console.log(userId);
   if (!Number.isInteger(parseInt(id))) {
     return res.status(400).json({ error: "Invalid group ID" });
   }
@@ -208,14 +255,12 @@ async function deleteGroup(req, res) {
       return res.status(404).json({ error: "Group not found" });
     }
 
-    
     if (group.leaderId !== userId) {
       return res
         .status(403)
         .json({ error: "You are not authorized to delete this group" });
     }
 
-    
     await prisma.group.delete({
       where: { id: parseInt(id) },
     });
@@ -234,6 +279,7 @@ module.exports = {
   getGroups,
   getparticularGroup,
   addMemberToGroup,
+  joinUsingCode,
   notification,
-  deleteGroup
+  deleteGroup,
 };

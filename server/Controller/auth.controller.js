@@ -317,4 +317,25 @@ async function GoogleAuth(req, res) {
   }
 }
 
-module.exports = { signup, sendOTPverification, VerifyOTP, GoogleAuth };
+async function signOut(req, res) {
+  try {
+    // Clear the token cookie
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict", 
+    });
+
+    return res.status(200).json({
+      message: "Sign out successful",
+      success: true,
+    });
+  } catch (error) {
+    console.error("Sign out error:", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+      success: false,
+    });
+  }
+}
+module.exports = { signup, sendOTPverification, VerifyOTP, GoogleAuth, signOut };

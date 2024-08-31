@@ -28,6 +28,8 @@ const DisplayGroup = () => {
   const [groupGradients, setGroupGradients] = useState({});
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [groupToDelete, setGroupToDelete] = useState(null);
+  const [joinCode, setJoinCode] = useState("");
+  const [openJoinModal, setOpenJoinModal] = useState(false);
 
   useEffect(() => {
     const memberId = currentUser.id;
@@ -51,6 +53,38 @@ const DisplayGroup = () => {
       setGroupGradients(gradients);
     } catch (error) {
       console.error("Error fetching groups:", error);
+    }
+  };
+
+  const handleJoinGroup = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/join",
+        { code: joinCode },
+        {
+          withCredentials: true,
+        }
+      );
+
+      const joinedGroup = response.data.data;
+      setGroups((prevGroups) => [...prevGroups, joinedGroup]);
+      setGroupGradients((prevGradients) => ({
+        ...prevGradients,
+        [joinedGroup.id]: getRandomGradient(),
+      }));
+
+      toast.success("Successfully joined the group!");
+      setJoinCode("");
+      setOpenJoinModal(false);
+    } catch (err) {
+      toast.error("Failed to join group. Please try again.");
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -150,7 +184,9 @@ const DisplayGroup = () => {
             <Dropdown.Item onClick={() => setOpenCreateModal(true)}>
               Create Group
             </Dropdown.Item>
-            <Dropdown.Item>Settings</Dropdown.Item>
+            <Dropdown.Item onClick={() => setOpenJoinModal(true)}>
+              Join Group
+            </Dropdown.Item>
           </Dropdown>
         </div>
       </Navbar>
@@ -267,11 +303,44 @@ const DisplayGroup = () => {
           </Modal.Footer>
         </Modal>
 
+        {/* Join Group Modal */}
+        <Modal show={openJoinModal} onClose={() => setOpenJoinModal(false)}>
+          <Modal.Header>Join A Group</Modal.Header>
+          <Modal.Body>
+            <form onSubmit={handleJoinGroup} className="flex flex-col gap-4">
+              {error && <Alert color="failure">{error}</Alert>}
+              <div>
+                <Label htmlFor="joinCode">Join Code</Label>
+                <TextInput
+                  id="joinCode"
+                  type="text"
+                  value={joinCode}
+                  onChange={(e) => setJoinCode(e.target.value)}
+                  placeholder="Enter join code"
+                  required
+                  className="text-black"
+                />
+              </div>
+            </form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              onClick={handleJoinGroup}
+              type="submit"
+              pill
+              disabled={loading}
+              className="bg-blue-500 hover:bg-blue-700 text-white"
+            >
+              {loading ? "Joining..." : "Join"}
+            </Button>
+            <Button onClick={() => setOpenJoinModal(false)} pill color="gray">
+              Cancel
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
         {/* Delete Group Confirmation Modal */}
-        <Modal
-          show={openDeleteModal}
-          onClose={() => setOpenDeleteModal(false)}
-        >
+        <Modal show={openDeleteModal} onClose={() => setOpenDeleteModal(false)}>
           <Modal.Header>Confirm Group Deletion</Modal.Header>
           <Modal.Body>
             <p className="text-black">

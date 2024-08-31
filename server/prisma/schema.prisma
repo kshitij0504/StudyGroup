@@ -41,6 +41,8 @@ model Group {
   leaderId    Int
   leader      User    @relation("Leader", fields: [leaderId], references: [id])
   members     User[]  @relation("GroupMembers")
+  joinCode    String  @unique
+  createdAt   DateTime @default(now())
 }
 
 model Notification {

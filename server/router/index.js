@@ -3,6 +3,7 @@ const {
   signup,
   VerifyOTP,
   GoogleAuth,
+  signOut
 } = require("../Controller/auth.controller");
 const checkEmail = require("../Controller/login.controller");
 const router = express.Router();
@@ -14,8 +15,10 @@ const {
   getparticularGroup,
   addMemberToGroup,
   deleteGroup,
-  notification,
+  joinUsingCode,
 } = require("../Controller/group.controller");
+const notification = require("../Controller/notification.controller");
+
 router.post("/signup", signup);
 
 router.post("/signin", checkEmail);
@@ -28,6 +31,8 @@ router.put("/update/:userId", getUserDetailstoken, updateUser);
 
 router.post("/creategroup", getUserDetailstoken, createGroup);
 
+router.post("/join", getUserDetailstoken, joinUsingCode);
+
 router.get("/displaygroups", getGroups);
 
 router.post("/groups/:groupId/add-member", addMemberToGroup);
@@ -36,5 +41,8 @@ router.get("/groups/:id", getparticularGroup);
 
 router.delete("/group/:id", getUserDetailstoken, deleteGroup);
 
-router.get("/notifications/:userId", notification)
+router.get("/notifications/:userId", notification);
+
+router.get("/signout", signOut);
+
 module.exports = router;

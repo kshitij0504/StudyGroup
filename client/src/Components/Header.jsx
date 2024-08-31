@@ -1,18 +1,81 @@
-import React from "react";
-import { Navbar } from "flowbite-react";
-import { Link } from "react-router-dom";
+import { Avatar, Dropdown, Navbar } from "flowbite-react";
+import { useSelector } from "react-redux";
+import image from "../assets/logo1.png";
+import { CgProfile } from "react-icons/cg";
+import { CiLogout } from "react-icons/ci";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { signoutStart, signoutSuccess } from "../redux/user/userSlice";
+export default function Header() {
+  const { currentUser } = useSelector((state) => state.user || {});
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const handleLogout = async () => {
+    try {
+      dispatch(signoutStart());
 
-const Header = () => {
+      await axios.get("/api/signout", { withCredentials: true });
+      dispatch(signoutSuccess());
+      navigate("/signin");
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
   return (
-    <Navbar className="border-b-2">
-      <Link to="/" className="self-center whitespace-nowrap text-sm sm:text-xl font-semibold">
-        <span className="px-2 py-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-blue-500 rounded-lg text-white">
-          Class
-        </span>
-        plus
-      </Link>
+    <Navbar
+      fluid
+      rounded
+      className="bg-gray-900 px-4 md:px-8 lg:px-16 py-2 shadow-md"
+    >
+      <Navbar.Brand href="/">
+        <img src={image} alt="Logo Here" className="h-12 w-12 mr-3" />
+        <span className="text-2xl font-semibold text-white">Class Plus</span>
+      </Navbar.Brand>
+      <div className="flex items-center gap-4 md:ml-auto">
+        <Navbar.Toggle />
+        <Dropdown
+          arrowIcon={false}
+          inline
+          label={
+            <Avatar
+              alt="User settings"
+              img={
+                currentUser.avatar ||
+                "https://flowbite.com/docs/images/people/profile-picture-5.jpg"
+              }
+              rounded
+            />
+          }
+        >
+          <Dropdown.Header>
+            <span className="block text-sm font-medium text-gray-900">
+              {currentUser.username || "User"}
+            </span>
+            <span className="block truncate text-sm font-medium text-gray-600">
+              {currentUser.email || "user@example.com"}
+            </span>
+          </Dropdown.Header>
+          <Dropdown.Item>
+            <Link to="/updateprofile">
+              <span className="flex items-center gap-2 text-sm text-gray-800 hover:text-blue-600">
+                <CgProfile />
+                Profile
+              </span>
+            </Link>
+          </Dropdown.Item>
+          <Dropdown.Divider />
+          <Dropdown.Item>
+            <span
+              onClick={handleLogout}
+              className="flex items-center gap-2 text-sm text-gray-800 hover:text-red-600"
+            >
+              <CiLogout />
+              Sign out
+            </span>
+          </Dropdown.Item>
+        </Dropdown>
+      </div>
     </Navbar>
   );
-};
-
-export default Header;
+}
